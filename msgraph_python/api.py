@@ -1,3 +1,4 @@
+import os
 from azure.identity import InteractiveBrowserCredential, DeviceCodeCredential
 from msgraph import GraphServiceClient
 from msgraph_python.exceptions import *
@@ -11,20 +12,40 @@ from msgraph_python.exceptions import *
 # - Fetch [Unread] Outlook emails.
 # - Fetch [Today's] Calendar events.
 
-async def NewGraphAPI(client_id, tenant_id, interactive=False):
+async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=["mail","calender", "teams-chat", "teams-channel"]):
     """ Create an authenticated GraphAPI connection.
     Args:
         client_id: The client ID for the Azure app.
         tenant_id: The tenant ID for the Azure app.
+        interactive: A boolean to indicate if the user should interactively authenticate.
+        scopes: A list of scopes to request from the Microsoft Graph API.
     Returns:
-        GraphAPI: The authenticated GraphAPI connection.
+        GraphAPI: The authenticated GraphAPI connection with the selected scopes.
     Raises:
         AuthorizationException: If the client fails to authenticate with the Microsoft Graph API.
     """
-    scopes = ['User.Read', 'Mail.Read', 'Calendars.Read', 'Chat.Read', 'ChannelMessage.Read.All']
+    if not client_id:
+        client_id = os.getenv("CLIENT_ID")
+    if not tenant_id:
+        tenant_id = os.getenv("TENANT_ID")
+    if not client_id or not tenant_id or not scopes:
+        raise AuthorizationException("Invalid authentication parameters. Must provide client_id, tenant_id, and scopes.")
+
+    selected_scopes = ['User.Read']
+    if "mail" in scopes:
+       selected_scopes.append('Mail.Read')
+    if "calender" in scopes:
+        selected_scopes.append('Calendars.Read')
+    if "teams-chat" in scopes:
+        selected_scopes.append('Chat.Read')
+    if "teams-channel" in scopes:
+        selected_scopes.append('ChannelMessage.Read.All')
+    if len(selected_scopes) == 1:
+        raise AuthorizationException("Invalid authentication scopes. Must be 'mail' 'calender', 'teams-chat', or 'teams-channel'.")
+
     if interactive:
-        return GraphAPI(client=await interactive_browser_connection(scopes))
-    return GraphAPI(client=await device_credential_connection(client_id, tenant_id, scopes))
+        return GraphAPI(client=await interactive_browser_connection(selected_scopes))
+    return GraphAPI(client=await device_credential_connection(client_id, tenant_id, selected_scopes))
 
 async def device_credential_connection(client_id, tenant_id, scopes):
     # Create an application connection with the Microsoft Graph API
