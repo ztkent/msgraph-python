@@ -29,14 +29,7 @@ Start development for applications that:
     - Admin consent is required for the following permissions:
         - `ChannelMessage.Read.All`: Read user Teams channel messages
 
-### Configure your ENV variables
-- Create a .env file in the same directory as this module, or export the following environment variables:
-    ```bash
-    CLIENT_ID=
-    TENANT_ID=
-    ```
-
-### Install the GraphAPI module
+### Install MSGraph-Python
 ```bash
 pip install git+https://github.com/Ztkent/msgraph-python.git
 ```
@@ -50,9 +43,12 @@ pip install git+https://github.com/Ztkent/msgraph-python.git
 ```python
 async def example_connection(client_id, tenant_id):
     try: 
-        api_client = await NewGraphAPI(client_id, tenant_id)
+        graph_api = await NewGraphAPI(
+            client_id="YOUR_CLIENT_ID",
+            tenant_id="YOUR_TENANT_ID",
+            scopes=["mail", "calender", "teams-chat", "teams-channel"])
     except AuthorizationException as e:
-        print(f"Failed to authenticate with the Microsoft Graph API: {e}")
+        print(f"{e}")
         return
 ```
 

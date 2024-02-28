@@ -1,4 +1,4 @@
-class AuthorizationException(Exception):
+class MicrosoftAuthorizationException(Exception):
     """Exception raised when failing to connect to the Microsoft Graph API."""
 
     def __init__(self, message="Failed to connect to the Microsoft Graph API"):
@@ -6,7 +6,7 @@ class AuthorizationException(Exception):
         super().__init__(self.message)
 
 
-class RequestException(Exception):
+class MicrosoftRequestException(Exception):
     """Exception raised when a Microsoft Graph API request fails."""
 
     def __init__(self, message="Microsoft Graph API request failed"):
