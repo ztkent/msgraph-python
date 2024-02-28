@@ -29,7 +29,7 @@ async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=
     if not tenant_id:
         tenant_id = os.getenv("TENANT_ID")
     if not client_id or not tenant_id or not scopes:
-        raise AuthorizationException("Invalid authentication parameters. Must provide client_id, tenant_id, and scopes.")
+        raise MicrosoftAuthorizationException("Invalid authentication parameters. Must provide client_id, tenant_id, and scopes.")
 
     selected_scopes = ['User.Read']
     if "mail" in scopes:
@@ -41,7 +41,7 @@ async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=
     if "teams-channel" in scopes:
         selected_scopes.append('ChannelMessage.Read.All')
     if len(selected_scopes) == 1:
-        raise AuthorizationException("Invalid authentication scopes. Must be 'mail' 'calender', 'teams-chat', or 'teams-channel'.")
+        raise MicrosoftAuthorizationException("Invalid authentication scopes. Must be 'mail' 'calender', 'teams-chat', or 'teams-channel'.")
 
     if interactive:
         return GraphAPI(client=await interactive_browser_connection(selected_scopes))
@@ -55,7 +55,7 @@ async def device_credential_connection(client_id, tenant_id, scopes):
     if response:
         print(response.display_name)
     else:
-        raise AuthorizationException("Failed to authenticate user with the Microsoft Graph API")
+        raise MicrosoftAuthorizationException("Failed to authenticate user with the Microsoft Graph API")
     return client
 
 async def interactive_browser_connection(scopes):
@@ -67,7 +67,7 @@ async def interactive_browser_connection(scopes):
     if response:
         print(response.display_name)
     else:
-        raise AuthorizationException("Failed to authenticate user with the Microsoft Graph API")
+        raise MicrosoftAuthorizationException("Failed to authenticate user with the Microsoft Graph API")
     return client
 
 class GraphAPI:
@@ -120,7 +120,7 @@ class GraphAPI:
             response_dict = response.__dict__
             return response_dict
         except Exception as e:
-            raise RequestException(f"Failed to get user info: {e}")
+            raise MicrosoftRequestException(f"Failed to get user info: {e}")
 
     # Get messages from the teams channels the authorized user is a part of
     # Requires the "ChannelMessage.Read.All" permission. 
@@ -147,7 +147,7 @@ class GraphAPI:
                 messages[team.id] = team_messages
             return messages
         except Exception as e:
-            raise RequestException(f"Failed to get Teams messages: {e}")
+            raise MicrosoftRequestException(f"Failed to get Teams messages: {e}")
 
     # Get the unread messages from the teams the authorized user is a part of
     # Requires the "ChannelMessage.Read.All" permission
@@ -174,7 +174,7 @@ class GraphAPI:
                 messages[team.id] = team_messages
             return messages
         except Exception as e:
-            raise RequestException(f"Failed to get Teams messages: {e}")
+            raise MicrosoftRequestException(f"Failed to get Teams messages: {e}")
 
     # Get the messages from a specific chat
     # Requires the "Chat.Read" permission
@@ -192,7 +192,7 @@ class GraphAPI:
             response = await self.client.me.chats[chat_id].messages.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get chat messages: {e}")
+            raise MicrosoftRequestException(f"Failed to get chat messages: {e}")
 
     # Get all the chats of the authorized user
     # Requires the "Chat.Read" permission
@@ -210,7 +210,7 @@ class GraphAPI:
             response = await self.client.me.chats.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get chats: {e}")
+            raise MicrosoftRequestException(f"Failed to get chats: {e}")
     
     # Get all unread messages from all chats of the authorized user
     # Requires the "Chat.Read" permission
@@ -233,7 +233,7 @@ class GraphAPI:
                 messages[chat.id] = unread_messages
             return messages
         except Exception as e:
-            raise RequestException(f"Failed to get chat messages: {e}")
+            raise MicrosoftRequestException(f"Failed to get chat messages: {e}")
 
     # Get the emails of the authorized user
     # Requires the "Mail.Read" permission
@@ -251,7 +251,7 @@ class GraphAPI:
             response = await self.client.me.messages.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get emails: {e}")
+            raise MicrosoftRequestException(f"Failed to get emails: {e}")
 
     # Get the unread emails of the authorized user from the Outlook inbox
     # Requires the "Mail.Read" permission
@@ -269,7 +269,7 @@ class GraphAPI:
             response = await self.client.me.mail_folders.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get emails: {e}")
+            raise MicrosoftRequestException(f"Failed to get emails: {e}")
         
     # Get all the calendar events of the authorized user
     # Requires the "Calendars.Read" permission
@@ -287,7 +287,7 @@ class GraphAPI:
             response = await self.client.me.events.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get calendar events: {e}")
+            raise MicrosoftRequestException(f"Failed to get calendar events: {e}")
 
     # Get the calendar events of the authorized user for today
     # Requires the "Calendars.Read" permission
@@ -305,4 +305,4 @@ class GraphAPI:
             response = await self.client.me.calendar_view.get()
             return response
         except Exception as e:
-            raise RequestException(f"Failed to get todays calendar events: {e}")
+            raise MicrosoftRequestException(f"Failed to get todays calendar events: {e}")
