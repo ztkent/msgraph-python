@@ -1,7 +1,5 @@
-from datetime import datetime, timedelta
-from azure.identity import DeviceCodeCredential
+from azure.identity import InteractiveBrowserCredential, DeviceCodeCredential
 from msgraph import GraphServiceClient
-
 from msgraph_python.exceptions import *
 
 # Simplify interactions with the Microsoft Graph API
@@ -13,7 +11,7 @@ from msgraph_python.exceptions import *
 # - Fetch [Unread] Outlook emails.
 # - Fetch [Today's] Calendar events.
 
-async def NewGraphAPI(client_id, tenant_id):
+async def NewGraphAPI(client_id, tenant_id, interactive=False):
     """ Create an authenticated GraphAPI connection.
     Args:
         client_id: The client ID for the Azure app.
@@ -23,19 +21,33 @@ async def NewGraphAPI(client_id, tenant_id):
     Raises:
         AuthorizationException: If the client fails to authenticate with the Microsoft Graph API.
     """
+    scopes = ['User.Read', 'Mail.Read', 'Calendars.Read', 'Chat.Read', 'ChannelMessage.Read.All']
+    if interactive:
+        return GraphAPI(client=await interactive_browser_connection(scopes))
+    return GraphAPI(client=await device_credential_connection(client_id, tenant_id, scopes))
+
+async def device_credential_connection(client_id, tenant_id, scopes):
     # Create an application connection with the Microsoft Graph API
     credentials = DeviceCodeCredential(client_id=client_id, tenant_id=tenant_id)
-    scopes = ['User.Read', 'Mail.Read', 'Calendars.Read', 'Chat.Read', 'ChannelMessage.Read.All']
     client = GraphServiceClient(credentials=credentials, scopes=scopes)
-    
-    # Force validate the connection by getting the user info
     response = await client.me.get()
     if response:
         print(response.display_name)
     else:
         raise AuthorizationException("Failed to authenticate user with the Microsoft Graph API")
+    return client
 
-    return GraphAPI(client)
+async def interactive_browser_connection(scopes):
+    # Create an application connection with the Microsoft Graph API
+    # Must first be configured via preauthorization
+    credentials = InteractiveBrowserCredential()
+    client = GraphServiceClient(credentials=credentials, scopes=scopes)
+    response = await client.me.get()
+    if response:
+        print(response.display_name)
+    else:
+        raise AuthorizationException("Failed to authenticate user with the Microsoft Graph API")
+    return client
 
 class GraphAPI:
     def __init__(self, client):
@@ -103,7 +115,7 @@ class GraphAPI:
             RequestException: If the request to get Teams messages fails.
         """
         try: 
-            teams = await self.client.me.joinedTeams.get()
+            teams = await self.client.me.joined_teams.get()
             messages = {}
             for team in teams:
                 team_messages = []
@@ -130,7 +142,7 @@ class GraphAPI:
             RequestException: If the request to get Teams messages fails.
         """
         try: 
-            teams = await self.client.me.joinedTeams.get()
+            teams = await self.client.me.joined_teams.get()
             messages = {}
             for team in teams:
                 team_messages = []
@@ -233,7 +245,7 @@ class GraphAPI:
             RequestException: If the request to get emails fails.
         """
         try: 
-            response = await self.client.me.mailFolders['inbox'].messages.request().filter("isRead eq false").get()
+            response = await self.client.me.mail_folders.get()
             return response
         except Exception as e:
             raise RequestException(f"Failed to get emails: {e}")
@@ -269,9 +281,7 @@ class GraphAPI:
             RequestException: If the request to get calendar events fails.
         """
         try: 
-            today = datetime.utcnow().isoformat()
-            tomorrow = (datetime.utcnow() + timedelta(days=1)).isoformat()
-            response = await self.client.me.calendar.calendarView.get(startDateTime=today, endDateTime=tomorrow)
+            response = await self.client.me.calendar_view.get()
             return response
         except Exception as e:
             raise RequestException(f"Failed to get todays calendar events: {e}")
