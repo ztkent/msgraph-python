@@ -29,7 +29,7 @@ Start development for applications that:
     - Admin consent is required for the following permissions:
         - `ChannelMessage.Read.All`: Read user Teams channel messages
 
-### Install the GraphAPI module
+### Install MSGraph-Python
 ```bash
 pip install git+https://github.com/Ztkent/msgraph-python.git
 ```
