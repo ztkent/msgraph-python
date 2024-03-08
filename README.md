@@ -51,7 +51,3 @@ async def example_connection(client_id, tenant_id):
         print(f"{e}")
         return
 ```
-
-### Example Usage
-```python
-```
