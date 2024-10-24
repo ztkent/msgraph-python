@@ -31,7 +31,7 @@ Start development for applications that:
 
 ### Install MSGraph-Python
 ```bash
-pip install git+https://github.com/Ztkent/msgraph-python.git
+pip install git+https://github.com/ztkent/msgraph-python.git
 ```
 
 ### Authorize the application
