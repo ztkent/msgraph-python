@@ -24,7 +24,7 @@ Start development for applications that:
 - Select Microsoft Graph, then Delegated permissions, and then add the necessary permissions.
     - `User.Read`: Read basic profile data
     - `Mail.Read`: Read user Outlook mail
-    - `Calendars.Read`: Read user Calender
+    - `Calendars.Read`: Read user calendar
     - `Chat.Read`: Read user Teams chat messages 
     - Admin consent is required for the following permissions:
         - `ChannelMessage.Read.All`: Read user Teams channel messages
@@ -46,7 +46,7 @@ async def example_connection(client_id, tenant_id):
         graph_api = await NewGraphAPI(
             client_id="YOUR_CLIENT_ID",
             tenant_id="YOUR_TENANT_ID",
-            scopes=["mail", "calender", "teams-chat", "teams-channel"])
+            scopes=["mail", "calendar", "teams-chat", "teams-channel"])
     except AuthorizationException as e:
         print(f"{e}")
         return

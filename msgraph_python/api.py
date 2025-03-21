@@ -12,7 +12,7 @@ from msgraph_python.exceptions import *
 # - Fetch [Unread] Outlook emails.
 # - Fetch [Today's] Calendar events.
 
-async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=["mail","calender", "teams-chat", "teams-channel"]):
+async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=["mail","calendar", "teams-chat", "teams-channel"]):
     """ Create an authenticated GraphAPI connection.
     Args:
         client_id: The client ID for the Azure app.
@@ -34,14 +34,14 @@ async def NewGraphAPI(client_id=None, tenant_id=None, interactive=False, scopes=
     selected_scopes = ['User.Read']
     if "mail" in scopes:
        selected_scopes.append('Mail.Read')
-    if "calender" in scopes:
+    if "calendar" in scopes:
         selected_scopes.append('Calendars.Read')
     if "teams-chat" in scopes:
         selected_scopes.append('Chat.Read')
     if "teams-channel" in scopes:
         selected_scopes.append('ChannelMessage.Read.All')
     if len(selected_scopes) == 1:
-        raise MicrosoftAuthorizationException("Invalid authentication scopes. Must be 'mail' 'calender', 'teams-chat', or 'teams-channel'.")
+        raise MicrosoftAuthorizationException("Invalid authentication scopes. Must be 'mail' 'calendar', 'teams-chat', or 'teams-channel'.")
 
     if interactive:
         return GraphAPI(client=await interactive_browser_connection(selected_scopes))
